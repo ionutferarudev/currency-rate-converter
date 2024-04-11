@@ -72,6 +72,8 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Moved the logic into an account core adapter.
   * Replaced optional with exception -> AccountNotFound
 * Better error handling, especially of potential errors from NBP API.
+  * Added exception handling for the NBP API client + E2E integration test
+  * Added Integration test for the NBP API client
 * Caching the NBP API results.
 * Circuit-breaker for the NBP API client.
 * Better logging with traceability.

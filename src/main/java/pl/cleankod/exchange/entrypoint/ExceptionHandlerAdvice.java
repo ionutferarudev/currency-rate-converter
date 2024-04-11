@@ -1,5 +1,6 @@
 package pl.cleankod.exchange.entrypoint;
 
+import feign.FeignException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,5 +24,12 @@ public class ExceptionHandlerAdvice {
     })
     protected ResponseEntity<Void> handleAccountNotFound(AccountNotFound ex) {
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler({
+            FeignException.class
+    })
+    protected ResponseEntity<Void> handleNbpClientException(FeignException ex) {
+        return ResponseEntity.internalServerError().build();
     }
 }

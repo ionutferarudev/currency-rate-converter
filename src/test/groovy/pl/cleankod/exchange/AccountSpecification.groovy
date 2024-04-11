@@ -20,7 +20,7 @@ class AccountSpecification extends BaseApplicationSpecification {
     def setupSpec() {
         wireMockServer.start()
 
-        def body = "{\"table\":\"A\",\"currency\":\"euro\",\"code\":\"EUR\",\"rates\":[{\"no\":\"026/A/NBP/2022\",\"effectiveDate\":\"2022-02-08\",\"mid\":4.5452}]}"
+        def body = '{"table":"A","currency":"euro","code":"EUR","rates":[{"no":"026/A/NBP/2022","effectiveDate":"2022-02-08","mid":4.5452}]}'
         wireMockServer.stubFor(
                 WireMock.get("/exchangerates/rates/A/EUR/2022-02-08")
                         .willReturn(WireMock.ok(body))
@@ -60,6 +60,25 @@ class AccountSpecification extends BaseApplicationSpecification {
                 Account.Number.of("65 1090 1665 0000 0001 0373 7343"),
                 Money.of("27.13", currency)
         )
+    }
+
+    def "should return 500 internal server error when NBP API fails with any status code"() {
+        given:
+        def accountId = "fa07c538-8ce4-11ec-9ad5-4f5a625cd744"
+        def currency = "EUR"
+        wireMockServer.stubFor(
+                WireMock.get("/exchangerates/rates/A/EUR/2022-02-08")
+                        .willReturn(WireMock.status(nbpApiStatusCode))
+        )
+
+        when:
+        def response = getResponse("/accounts/${accountId}?currency=${currency}")
+
+        then:
+        response.getStatusLine().getStatusCode() == 500
+
+        where:
+        nbpApiStatusCode << [400, 401, 404, 500, 503]
     }
 
     def "should return an account by number"() {
