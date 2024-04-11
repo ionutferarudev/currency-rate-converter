@@ -75,6 +75,8 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Added exception handling for the NBP API client + E2E integration test
   * Added Integration test for the NBP API client
 * Caching the NBP API results.
+  * Implemented caching using default implementation from spring (Concurrent HashMap) + TTL at midnight
+  * Added integration test for caching
 * Circuit-breaker for the NBP API client.
 * Better logging with traceability.
 * Replace exceptions with `Result` (`either`) which improves the overall methods API readability and forces error handling. Look into [cleankod/architecture-archetype](https://github.com/cleankod/architecture-archetype) as a starting point.

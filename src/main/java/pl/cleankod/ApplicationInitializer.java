@@ -8,7 +8,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
+import pl.cleankod.config.SpringCachingConfig;
 import pl.cleankod.exchange.core.gateway.AccountRepository;
 import pl.cleankod.exchange.core.gateway.CurrencyConversionService;
 import pl.cleankod.exchange.core.usecase.FindAccountAndConvertCurrencyUseCase;
@@ -24,6 +26,7 @@ import java.util.Currency;
 
 @SpringBootConfiguration
 @EnableAutoConfiguration
+@Import(SpringCachingConfig.class)
 public class ApplicationInitializer {
     public static void main(String[] args) {
         SpringApplication.run(ApplicationInitializer.class, args);

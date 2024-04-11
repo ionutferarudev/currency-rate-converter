@@ -19,6 +19,7 @@ class AccountSpecification extends BaseApplicationSpecification {
 
     def setupSpec() {
         wireMockServer.start()
+        WireMock.configureFor("localhost", 8081)
 
         def body = '{"table":"A","currency":"euro","code":"EUR","rates":[{"no":"026/A/NBP/2022","effectiveDate":"2022-02-08","mid":4.5452}]}'
         wireMockServer.stubFor(
@@ -62,12 +63,30 @@ class AccountSpecification extends BaseApplicationSpecification {
         )
     }
 
-    def "should return 500 internal server error when NBP API fails with any status code"() {
+    def "should call NBP API only once then use the values from the cache for the rest of calls"() {
         given:
         def accountId = "fa07c538-8ce4-11ec-9ad5-4f5a625cd744"
         def currency = "EUR"
+
+        when:
+        Account response = get("/accounts/${accountId}?currency=${currency}", Account)
+        Account response1 = get("/accounts/${accountId}?currency=${currency}", Account)
+        Account response2 = get("/accounts/${accountId}?currency=${currency}", Account)
+
+        then:
+        response == response1 && response1 == response2 && response2 == new Account(
+                Account.Id.of(accountId),
+                Account.Number.of("65 1090 1665 0000 0001 0373 7343"),
+                Money.of("27.13", currency)
+        )
+        WireMock.verify(1, WireMock.getRequestedFor(WireMock.urlEqualTo("/exchangerates/rates/A/EUR/2022-02-08")))
+    }
+
+    def "should return 500 internal server error when NBP API fails with any status code"() {
+        given:
+        def accountId = "fa07c538-8ce4-11ec-9ad5-4f5a625cd744"
         wireMockServer.stubFor(
-                WireMock.get("/exchangerates/rates/A/EUR/2022-02-08")
+                WireMock.get("/exchangerates/rates/A/" + currency + "/2022-02-08")
                         .willReturn(WireMock.status(nbpApiStatusCode))
         )
 
@@ -79,6 +98,7 @@ class AccountSpecification extends BaseApplicationSpecification {
 
         where:
         nbpApiStatusCode << [400, 401, 404, 500, 503]
+        currency << ["A", "B", "C", "D", "E"]
     }
 
     def "should return an account by number"() {
