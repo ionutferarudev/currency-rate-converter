@@ -101,6 +101,48 @@ class AccountSpecification extends BaseApplicationSpecification {
         currency << ["A", "B", "C", "D", "E"]
     }
 
+    def "should retry to call NBP API 3 times when it fails with 500 status code"() {
+        given:
+        def accountId = "fa07c538-8ce4-11ec-9ad5-4f5a625cd744"
+        def currency = "USD"
+
+        wireMockServer.stubFor(
+                WireMock.get("/exchangerates/rates/A/USD/2022-02-08")
+                        .willReturn(WireMock.serverError())
+        )
+
+        when:
+        def response = getResponse("/accounts/${accountId}?currency=${currency}")
+
+        then:
+        response.getStatusLine().getStatusCode() == 500
+
+        WireMock.verify(3, WireMock.getRequestedFor(WireMock.urlEqualTo("/exchangerates/rates/A/USD/2022-02-08")))
+    }
+
+    def "circuit breaker should be in state open and stop the requests after the NBP API fails more than 4 times with 500 status code"() {
+        given:
+        def accountId = "fa07c538-8ce4-11ec-9ad5-4f5a625cd744"
+        def currency = "USD"
+
+        wireMockServer.stubFor(
+                WireMock.get("/exchangerates/rates/A/USD/2022-02-08")
+                        .willReturn(WireMock.serverError())
+        )
+
+        when:
+        def response = getResponse("/accounts/${accountId}?currency=${currency}") // 1 + 3 retries -> fallback method
+        def response2 = getResponse("/accounts/${accountId}?currency=${currency}") // fallback method
+        def response3 = getResponse("/accounts/${accountId}?currency=${currency}") // fallback method
+
+        then:
+        response.getStatusLine().getStatusCode() == 500
+        response2.getStatusLine().getStatusCode() == 500
+        response3.getStatusLine().getStatusCode() == 500
+
+        WireMock.verify(4, WireMock.getRequestedFor(WireMock.urlEqualTo("/exchangerates/rates/A/USD/2022-02-08")))
+    }
+
     def "should return an account by number"() {
         given:
         def accountNumberValue = "75 1240 2034 1111 0000 0306 8582"

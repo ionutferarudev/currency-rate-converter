@@ -78,6 +78,8 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Implemented caching using default implementation from spring (Concurrent HashMap) + TTL at midnight
   * Added integration test for caching
 * Circuit-breaker for the NBP API client.
+  * Added Resilience4j and implemented retry + circuit breaker for the NBP API
+  * Added integration tests for the retry + circuit breaker
 * Better logging with traceability.
 * Replace exceptions with `Result` (`either`) which improves the overall methods API readability and forces error handling. Look into [cleankod/architecture-archetype](https://github.com/cleankod/architecture-archetype) as a starting point.
 * Test coverage report.
