@@ -2,12 +2,12 @@ package pl.cleankod.exchange.core.usecase;
 
 import pl.cleankod.exchange.core.domain.Account;
 import pl.cleankod.exchange.core.domain.Money;
+import pl.cleankod.exchange.core.exception.AccountNotFound;
 import pl.cleankod.exchange.core.exception.CurrencyConversionException;
 import pl.cleankod.exchange.core.gateway.AccountRepository;
 import pl.cleankod.exchange.core.gateway.CurrencyConversionService;
 
 import java.util.Currency;
-import java.util.Optional;
 
 public class FindAccountAndConvertCurrencyUseCase {
 
@@ -23,14 +23,16 @@ public class FindAccountAndConvertCurrencyUseCase {
         this.baseCurrency = baseCurrency;
     }
 
-    public Optional<Account> execute(Account.Id id, Currency targetCurrency) {
+    public Account execute(Account.Id id, Currency targetCurrency) {
         return accountRepository.find(id)
-                .map(account -> new Account(account.id(), account.number(), convert(account.balance(), targetCurrency)));
+                .map(account -> new Account(account.id(), account.number(), convert(account.balance(), targetCurrency)))
+                .orElseThrow(() -> new AccountNotFound("Account not found by id " + id));
     }
 
-    public Optional<Account> execute(Account.Number number, Currency targetCurrency) {
+    public Account execute(Account.Number number, Currency targetCurrency) {
         return accountRepository.find(number)
-                .map(account -> new Account(account.id(), account.number(), convert(account.balance(), targetCurrency)));
+                .map(account -> new Account(account.id(), account.number(), convert(account.balance(), targetCurrency)))
+                .orElseThrow(() -> new AccountNotFound("Account not found by number " + number));
     }
 
     private Money convert(Money money, Currency targetCurrency) {

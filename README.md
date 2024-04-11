@@ -69,6 +69,8 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Fixed the rounding problem, by using the default rounding method (HALF_EVEN) when calculating money. As improvement, we could consider using JSR 354: [Money and Currency API](https://jcp.org/en/jsr/detail?id=354)
 * Investigate whether it is possible to implement the value-object serialization, to avoid `value` nested field in JSON. See [#10](https://github.com/cleankod/currency-rate-converter/pull/10) as a starting point. Or maybe there is a better solution to the problem at hand?
 * Move parameter-specific logic outside the controller.
+  * Moved the logic into an account core adapter.
+  * Replaced optional with exception -> AccountNotFound
 * Better error handling, especially of potential errors from NBP API.
 * Caching the NBP API results.
 * Circuit-breaker for the NBP API client.
