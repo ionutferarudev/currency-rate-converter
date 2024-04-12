@@ -68,6 +68,7 @@ Also, value-objects are responsible for a little more than just plain data holdi
 * Rounding when calculating the amount is not done correctly for this type of operation (we're loosing money!) and it is done in the wrong place.
   * Fixed the rounding problem, by using the default rounding method (HALF_EVEN) when calculating money. As improvement, we could consider using JSR 354: [Money and Currency API](https://jcp.org/en/jsr/detail?id=354)
 * Investigate whether it is possible to implement the value-object serialization, to avoid `value` nested field in JSON. See [#10](https://github.com/cleankod/currency-rate-converter/pull/10) as a starting point. Or maybe there is a better solution to the problem at hand?
+  * I think that the solution proposed fits just right, because it doesn't pollute the domain records with annotations or any framework specific code.
 * Move parameter-specific logic outside the controller.
   * Moved the logic into an account core adapter.
   * Replaced optional with exception -> AccountNotFound
@@ -75,7 +76,7 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Added exception handling for the NBP API client + E2E integration test
   * Added Integration test for the NBP API client
 * Caching the NBP API results.
-  * Implemented caching using default implementation from spring (Concurrent HashMap) + TTL at midnight
+  * Implemented caching using the default implementation from spring (Concurrent HashMap) + TTL at midnight
   * Added integration test for caching
 * Circuit-breaker for the NBP API client.
   * Added Resilience4j and implemented retry + circuit breaker for the NBP API
@@ -83,8 +84,19 @@ Also, value-objects are responsible for a little more than just plain data holdi
 * Better logging with traceability.
   * Added logging on the e2e flow + logging exception messages in the controller advice
 * Replace exceptions with `Result` (`either`) which improves the overall methods API readability and forces error handling. Look into [cleankod/architecture-archetype](https://github.com/cleankod/architecture-archetype) as a starting point.
+  * I already cleaned up the API and I increased the readability, by decoupling the happy path from the errors ones - which were implemented by throwing exception then catching and treating them in the controller advice.
+  * The solution proposed is interesting as well and as mentioned, it forces you to error handling. Although, from my point of view it becomes too verbose.
 * Test coverage report.
+  * We can achieve this using the jacoco plugin, which can integrate easily with sonar later. 
+  * By running locally the tests with coverage in IntelliJ, the report says 95% coverage, which is pretty good.
 * Auto generating REST API docs.
+  * We could use springdoc-openapi to generate the REST API spec, but first we need to write the documentation of the API using the specific annotations. -  this will be the code first approach
+  * We could also write the openapi schema of the REST API ourselves and then generate the code based on it. - this is the API first approach
 * Integration tests with the real NBP API.
+  * I wrote additional integration tests using Wiremock for the responses from NBP API
 * Replace Spring Framework with a different one.
+  * Interesting idea, we can definitely do so, since the core implementation doesn't contain any framework specific code. 
 * The proposed architecture is not perfect. Suggest improvements.
+  * The architecture itself it's a pretty good one, there is a clear separation of responsibilities, also a separation between the domain and integrations (other APIs or the database)
+  * Of course, the separation of classes in packages could be improved - I also did some of that
+  * I'd also suggest using API first approach
