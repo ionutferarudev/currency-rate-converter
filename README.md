@@ -81,6 +81,7 @@ Also, value-objects are responsible for a little more than just plain data holdi
   * Added Resilience4j and implemented retry + circuit breaker for the NBP API
   * Added integration tests for the retry + circuit breaker
 * Better logging with traceability.
+  * Added logging on the e2e flow + logging exception messages in the controller advice
 * Replace exceptions with `Result` (`either`) which improves the overall methods API readability and forces error handling. Look into [cleankod/architecture-archetype](https://github.com/cleankod/architecture-archetype) as a starting point.
 * Test coverage report.
 * Auto generating REST API docs.

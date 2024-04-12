@@ -21,6 +21,7 @@ public class ExceptionHandlerAdvice {
             IllegalArgumentException.class
     })
     protected ResponseEntity<ApiError> handleBadRequest(CurrencyConversionException ex) {
+        LOGGER.error(ex.getMessage());
         return ResponseEntity.badRequest().body(new ApiError(ex.getMessage()));
     }
 
@@ -28,6 +29,7 @@ public class ExceptionHandlerAdvice {
             AccountNotFound.class
     })
     protected ResponseEntity<Void> handleAccountNotFound(AccountNotFound ex) {
+        LOGGER.error(ex.getMessage());
         return ResponseEntity.notFound().build();
     }
 
@@ -35,7 +37,7 @@ public class ExceptionHandlerAdvice {
             FeignException.class, ExchangeRatesServiceUnavailable.class
     })
     protected ResponseEntity<Void> handleNbpClientException(RuntimeException ex) {
-        LOGGER.error("handleNbpClientException", ex);
+        LOGGER.error("NBP Client Exception", ex);
         return ResponseEntity.internalServerError().build();
     }
 }
